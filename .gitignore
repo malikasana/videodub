@@ -1,0 +1,33 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# ── API storage (video files) ─────────────────────────────────────
+videodub-api/storage/
+videodub-api/dubbed/
+
+# ── AI server working dirs ────────────────────────────────────────
+videodub-ai/output/
+videodub-ai/workdir/
+
+# ── Flutter ───────────────────────────────────────────────────────
+videodub-frontend/build/
+videodub-frontend/.dart_tool/
+videodub-frontend/.flutter-plugins
+videodub-frontend/.flutter-plugins-dependencies
+
+# ── IDE ───────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+
+# ── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
