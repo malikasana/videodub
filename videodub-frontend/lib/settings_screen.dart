@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme_provider.dart';
 import 'user_service.dart';
+import 'api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -20,6 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _defaultDubLanguage = 'Hindi';
   String _userId = '';
   final String _appVersion = 'v0.1.0 prototype';
+  String _serverUrl = 'http://192.168.18.3:8000';
 
   final List<String> _languages = [
     'English', 'Spanish', 'French', 'German', 'Arabic',
@@ -42,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _defaultDubLanguage = prefs.getString('default_dub_language') ?? 'Hindi';
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _userId = userId;
+      _serverUrl = ApiService.instance.baseUrl;
     });
   }
 
@@ -128,6 +131,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         );
       },
+    );
+  }
+
+  void _showServerUrlDialog() {
+    final theme = ThemeScope.of(context);
+    final controller = TextEditingController(text: _serverUrl);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: theme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('API Server URL',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: theme.text)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: TextStyle(fontSize: 13, color: theme.text, fontFamily: 'monospace'),
+              decoration: InputDecoration(
+                hintText: 'http://192.168.x.x:8000',
+                hintStyle: TextStyle(color: theme.textHint),
+                filled: true,
+                fillColor: theme.bg,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: theme.border, width: 0.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: theme.border, width: 0.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.purple, width: 1),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Enter your server IP and port. Make sure your phone and server are on the same network.',
+                style: TextStyle(fontSize: 11, color: theme.textHint, height: 1.5)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: theme.textHint)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final url = controller.text.trim();
+              if (url.isEmpty) return;
+              await ApiService.instance.setBaseUrl(url);
+              setState(() => _serverUrl = url);
+              if (context.mounted) Navigator.pop(context);
+              _showSnackBar('Server URL updated');
+            },
+            child: const Text('Save',
+                style: TextStyle(color: AppColors.purple, fontWeight: FontWeight.w500)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -313,6 +380,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ],
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    ]),
+
+                    const SizedBox(height: 20),
+
+                    _SectionLabel(label: 'SERVER', theme: theme),
+                    _SettingsCard(theme: theme, children: [
+                      Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              _IconBox(icon: Icons.dns_rounded, theme: theme),
+                              const SizedBox(width: 10),
+                              Text('API Server URL',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.text)),
+                            ]),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: theme.bg,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: theme.border, width: 0.5),
+                                    ),
+                                    child: Text(_serverUrl,
+                                        style: TextStyle(fontSize: 12, fontFamily: 'monospace',
+                                            color: AppColors.teal, letterSpacing: 0.3),
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => _showServerUrlDialog(),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.purple,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text('Change',
+                                        style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text('Default: http://192.168.18.3:8000',
+                                style: TextStyle(fontSize: 10, color: theme.textFaint)),
                           ],
                         ),
                       ),

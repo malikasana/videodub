@@ -6,11 +6,13 @@ import 'user_service.dart';
 import 'library_service.dart';
 import 'notification_service.dart';
 import 'background_worker.dart';
+import 'api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final userService = await UserService.getInstance();
   await userService.getUserId();
+  await ApiService.instance.init();
   await NotificationService.init();
   await BackgroundWorker.init();
   await LibraryService.instance.init();
